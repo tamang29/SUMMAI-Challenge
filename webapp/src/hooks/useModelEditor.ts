@@ -1,6 +1,6 @@
 /**
  * Custom Hook - useModelEditor
- * Responsibility: Manage modeler lifecycle and state
+ * Responsibility: Manage modeler lifecycle and Yjs sync
  */
 
 import { useCallback, useEffect, useRef } from 'react';
@@ -15,6 +15,7 @@ import {
   fitDiagramToViewport,
   importDiagramXML
 } from '../services/modelerService';
+import { WebSocketSyncManager } from '../services/websocketSyncManager';
 
 interface UseModelEditorReturn {
   modelerRef: any;
@@ -26,6 +27,7 @@ export const useModelEditor = (
   socketRef: any
 ): UseModelEditorReturn => {
   const modelerRef = useRef(null) as any;
+  const syncManagerRef = useRef<WebSocketSyncManager | null>(null);
 
   /**
    * Handle diagram changes - auto-save to localStorage
@@ -54,8 +56,23 @@ export const useModelEditor = (
         // Fit to viewport
         fitDiagramToViewport(modeler);
 
-        // Setup auto-save on changes
-        modeler.on('commandStack.changed', handleDiagramChange);
+        // Initialize Yjs WebSocket sync manager
+        try {
+          const syncManager = new WebSocketSyncManager(
+            'ws://localhost:8000',
+            (error: Event) => {
+              console.error('WebSocket sync error:', error);
+            }
+          );
+          
+          await syncManager.initialize(modeler);
+          syncManagerRef.current = syncManager;
+
+        } catch (err) {
+          console.error('Failed to initialize Yjs sync:', err);
+          // Fallback to localStorage only
+          modeler.on('commandStack.changed', handleDiagramChange);
+        }
 
         console.log('BPMN modeler initialized successfully');
       } catch (err) {
@@ -67,13 +84,17 @@ export const useModelEditor = (
 
     // Cleanup on unmount
     return () => {
+      if (syncManagerRef.current) {
+        syncManagerRef.current.cleanup();
+        syncManagerRef.current = null;
+      }
+
       if (modelerRef.current) {
         destroyModeler(modelerRef.current);
         modelerRef.current = null;
       }
     };
   }, [handleDiagramChange]);
-
 
   const saveXML = useCallback(async () => {
     if (!modelerRef.current) return null;
