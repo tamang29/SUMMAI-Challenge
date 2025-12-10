@@ -1,0 +1,29 @@
+{
+  "name": "summai-challenge",
+  "version": "1.0.0",
+  "description": "BPMN Real-Time Collaboration Challenge",
+  "homepage": "https://github.com/tamang29/SUMMAI-Challenge#readme",
+  "bugs": {
+    "url": "https://github.com/tamang29/SUMMAI-Challenge/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tamang29/SUMMAI-Challenge.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "workspaces": [
+    "server",
+    "webapp"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev --workspace=server\" \"npm run dev --workspace=webapp\"",
+    "start": "npm start --workspaces",
+    "build": "npm run build --workspaces",
+    "server": "npm run dev --workspace=server",
+    "webapp": "npm run dev --workspace=webapp"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
