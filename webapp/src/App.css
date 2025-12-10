@@ -1,0 +1,32 @@
+.App {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 100vh;
+  padding: 20px;
+  background-color: #f3f4f6;
+}
+
+.App h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  color: #3b82f6;
+}
+
+.App p {
+  font-size: 1rem;
+  margin-bottom: 2rem;
+  color: #6b7280;
+}
+
+.bpmn-container {
+  width: 100%;
+  max-width: 1400px;
+  height: 700px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
