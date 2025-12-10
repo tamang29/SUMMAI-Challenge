@@ -3,20 +3,18 @@
  * Responsibility: Manage modeler lifecycle and state
  */
 
-import { useEffect, useRef, useCallback } from 'react';
-import Modeler from 'bpmn-js/lib/Modeler';
-import {
-  createModeler,
-  importDiagramXML,
-  exportDiagramXML,
-  fitDiagramToViewport,
-  destroyModeler
-} from '../services/modelerService';
+import { useCallback, useEffect, useRef } from 'react';
 import {
   loadDiagramFromStorage,
   saveDiagramToStorage
 } from '../services/diagramService';
-import { SocketService } from '../services/socketService';
+import {
+  createModeler,
+  destroyModeler,
+  exportDiagramXML,
+  fitDiagramToViewport,
+  importDiagramXML
+} from '../services/modelerService';
 
 interface UseModelEditorReturn {
   modelerRef: any;
