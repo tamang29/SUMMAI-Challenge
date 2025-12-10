@@ -6,8 +6,7 @@ import {
   setupWebSocketHandlers,
   broadcastMessage,
   broadcastMessageExcept,
-  getConnectedClientsCount,
-  broadcastClientCount
+  getConnectedClientsCount
 } from './services/websocketService.js';
 
 const app = express();
@@ -31,9 +30,6 @@ setupWebSocketHandlers(wss, {
       message: 'A new user has joined',
       clientCount: getConnectedClientsCount(wss)
     });
-    
-    // Send client count to all
-    broadcastClientCount(wss);
   },
 
   onMessage: (ws, data) => {
@@ -71,9 +67,6 @@ setupWebSocketHandlers(wss, {
       message: 'A user has left',
       clientCount: getConnectedClientsCount(wss)
     });
-    
-    // Send client count to all
-    broadcastClientCount(wss);
   },
 
   onError: (ws, error) => {
