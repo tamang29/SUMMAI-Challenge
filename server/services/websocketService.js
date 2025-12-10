@@ -111,14 +111,6 @@ export const getConnectedClientsCount = (wss) => {
   return userSessions.size;
 };
 
-export const broadcastClientCount = (wss) => {
-  const count = getConnectedClientsCount(wss);
-  broadcastMessage(wss, {
-    type: 'client-count',
-    count: count
-  });
-};
-
 export const closeWebSocketServer = (wss) => {
   wss.close(() => {
     console.log('WebSocket server closed');
