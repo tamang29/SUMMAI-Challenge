@@ -6,7 +6,7 @@ import {
   setupWebSocketHandlers,
   broadcastMessage,
   broadcastMessageExcept,
-  getConnectedClientsCount
+  getConnectedUsers
 } from './services/websocketService.js';
 
 const app = express();
@@ -21,14 +21,14 @@ app.use(express.json());
 const wss = createWebSocketServer(server);
 
 setupWebSocketHandlers(wss, {
-  onConnection: (ws) => {
-    console.log(`Total connected clients: ${getConnectedClientsCount(wss)}`);
+  onUserIdentified: (ws, wss) => {
+    console.log(`User ${ws.userId} identified. Total users: ${getConnectedUsers(wss).length}`);
     
-    // Notify all clients about new connection
+    // Notify all clients about new user connection
     broadcastMessage(wss, {
       type: 'user-joined',
       message: 'A new user has joined',
-      clientCount: getConnectedClientsCount(wss)
+      connectedUsers: getConnectedUsers(wss)
     });
   },
 
@@ -59,13 +59,13 @@ setupWebSocketHandlers(wss, {
   },
 
   onClose: (ws) => {
-    console.log(`Total connected clients: ${getConnectedClientsCount(wss)}`);
+    console.log(`Client disconnected. Total users: ${getConnectedUsers(wss).length}`);
     
     // Notify all clients about disconnection
     broadcastMessage(wss, {
       type: 'user-left',
       message: 'A user has left',
-      clientCount: getConnectedClientsCount(wss)
+      connectedUsers: getConnectedUsers(wss)
     });
   },
 
@@ -74,19 +74,14 @@ setupWebSocketHandlers(wss, {
   }
 });
 
-// Routes
-app.get('/', (req, res) => {
-  res.json({ message: 'Welcome to SUMMAI Challenge API' });
-});
 
 app.get('/health', (req, res) => {
   res.json({ 
     status: 'Server is running',
-    connectedClients: getConnectedClientsCount(wss)
+    connectedUsers: getConnectedUsers(wss).length
   });
 });
 
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
-  console.log(`WebSocket server available at ws://localhost:${PORT}`);
 });

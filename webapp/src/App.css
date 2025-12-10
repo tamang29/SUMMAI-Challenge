@@ -20,6 +20,42 @@
   color: #6b7280;
 }
 
+.connected-users-list {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  max-width: 200px;
+}
+
+.user-indicator {
+  color: #10b981;
+  margin-right: 6px;
+  font-weight: bold;
+}
+.connected-users-list h3 {
+  margin: 0 0 8px 0;
+  font-size: 0.875rem;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.connected-users-list ul {
+  list-style: none;
+  padding: 10px;
+  margin: 0;
+}
+
+.connected-users-list li {
+  padding: 4px 0;
+  font-size: 0.8125rem;
+  color: #6b7280;
+  word-break: break-all;
+}
+
 .bpmn-container {
   width: 100%;
   max-width: 1400px;
@@ -30,3 +66,4 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
+

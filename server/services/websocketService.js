@@ -15,23 +15,16 @@ export const createWebSocketServer = (server) => {
 
 export const setupWebSocketHandlers = (wss, handlers) => {
   wss.on('connection', (ws) => {
-    console.log('Client connected');
     ws.userId = null;
 
-    if (handlers.onConnection) {
-      handlers.onConnection(ws);
-    }
-
     ws.on('message', (data) => {
-      console.log('Message received:', data);
-      
-      try {
-        const message = JSON.parse(data);
-        if (message.type === 'user-identify' && message.userId) {
-          registerUserSession(ws, message.userId);
+      const message = JSON.parse(data);
+      if (message.type === 'user-identify' && message.userId) {
+        registerUserSession(ws, message.userId);
+        // Broadcast after user registration
+        if (handlers.onUserIdentified) {
+          handlers.onUserIdentified(ws, wss);
         }
-      } catch (err) {
-        // Not JSON
       }
       
       if (handlers.onMessage) {
@@ -107,8 +100,8 @@ export const broadcastMessageExcept = (wss, sender, message) => {
   });
 };
 
-export const getConnectedClientsCount = (wss) => {
-  return userSessions.size;
+export const getConnectedUsers = (wss) => {
+  return Array.from(userSessions.keys());
 };
 
 export const closeWebSocketServer = (wss) => {

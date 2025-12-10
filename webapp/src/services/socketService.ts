@@ -11,12 +11,14 @@ export class SocketService {
   socket: WebSocket | null;
   isConnected: boolean;
   userId: string;
+  onConnectedUsersUpdate: ((users: string[]) => void) | null;
 
   constructor(url: string) {
     this.url = url;
     this.socket = null;
     this.isConnected = false;
     this.userId = this.generateUserId();
+    this.onConnectedUsersUpdate = null;
   }
 
   /**
@@ -44,6 +46,10 @@ export class SocketService {
           this.isConnected = true;
           this.sendUserIdentification();
           resolve();
+        });
+
+        this.socket.addEventListener('message', (event: MessageEvent) => {
+          this.handleIncomingMessage(event.data);
         });
 
         this.socket.addEventListener('error', (error: Event) => {
@@ -74,6 +80,34 @@ export class SocketService {
       }));
       console.log('User ID sent:', this.userId);
     }
+  }
+
+  /**
+   * Handle incoming messages from server
+   * @private
+   */
+  private handleIncomingMessage(data: string): void {
+    try {
+      const message = JSON.parse(data);
+      console.log('WebSocket message received:', message);
+
+      // Handle connected users updates
+      if (message.connectedUsers && Array.isArray(message.connectedUsers)) {
+        if (this.onConnectedUsersUpdate) {
+          this.onConnectedUsersUpdate(message.connectedUsers);
+        }
+        console.log('Connected users:', message.connectedUsers);
+      }
+    } catch (err) {
+      console.error('Error handling message:', err);
+    }
+  }
+
+  /**
+   * Register callback for connected users updates
+   */
+  setOnConnectedUsersUpdate(callback: (users: string[]) => void): void {
+    this.onConnectedUsersUpdate = callback;
   }
 
   /**
