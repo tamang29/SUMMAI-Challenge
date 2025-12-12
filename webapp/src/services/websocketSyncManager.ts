@@ -23,7 +23,9 @@ export class WebSocketSyncManager {
 
   constructor(
     private wsUrl: string,
-    private onError?: (e: Event) => void
+    private onError?: (e: Event) => void,
+    private onUserCountUpdate?: (count: number) => void,
+    private onUserListUpdate?: (users: string[]) => void
   ) {
     this.userId = this.generateUserId();
   }
@@ -82,6 +84,16 @@ export class WebSocketSyncManager {
         // Handle diagram updates from other clients
         else if (data.type === 'diagram-update' && data.xml) {
           this.handleRemoteUpdate(data.xml);
+        }
+        // Handle user count updates
+        else if (data.type === 'user-count-update' && data.count !== undefined) {
+          console.log('Online users:', data.count);
+          if (this.onUserCountUpdate) {
+            this.onUserCountUpdate(data.count);
+          }
+          if (this.onUserListUpdate && data.users) {
+            this.onUserListUpdate(data.users);
+          }
         }
       } catch (err) {
         console.error('Error parsing WebSocket message:', err);

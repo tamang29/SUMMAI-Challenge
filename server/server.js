@@ -6,8 +6,8 @@ import {
   setupWebSocketHandlers,
   broadcastMessage,
   broadcastMessageExcept,
-  getConnectedUsers,
-  updateLatestDiagram
+  updateLatestDiagram,
+  getConnectedUsersList
 } from './services/websocketService.js';
 
 const app = express();
@@ -22,14 +22,11 @@ app.use(express.json());
 const wss = createWebSocketServer(server);
 
 setupWebSocketHandlers(wss, {
-  onUserIdentified: (ws, wss) => {
-    console.log(`User ${ws.userId} identified. Total users: ${getConnectedUsers(wss).length}`);
-    
-    // Notify all clients about new user connection
+  onUserCountChange: (wss, count) => {
     broadcastMessage(wss, {
-      type: 'user-joined',
-      message: 'A new user has joined',
-      connectedUsers: getConnectedUsers(wss)
+      type: 'user-count-update',
+      count: count,
+      users: Array.from(getConnectedUsersList())
     });
   },
 
@@ -76,14 +73,7 @@ setupWebSocketHandlers(wss, {
   },
 
   onClose: (ws) => {
-    console.log(`Client disconnected. Total users: ${getConnectedUsers(wss).length}`);
-    
-    // Notify all clients about disconnection
-    broadcastMessage(wss, {
-      type: 'user-left',
-      message: 'A user has left',
-      connectedUsers: getConnectedUsers(wss)
-    });
+    console.log('Client disconnected');
   },
 
   onError: (ws, error) => {
@@ -94,8 +84,7 @@ setupWebSocketHandlers(wss, {
 
 app.get('/health', (req, res) => {
   res.json({ 
-    status: 'Server is running',
-    connectedUsers: getConnectedUsers(wss).length
+    status: 'Server is running'
   });
 });
 

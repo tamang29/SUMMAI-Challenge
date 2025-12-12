@@ -4,11 +4,11 @@
 
 import { WebSocketServer, WebSocket } from 'ws';
 
-// Track unique users by session
-const userSessions = new Map(); // userId -> Set of connections
-
 // Store the latest diagram state
 let latestDiagramXML = null;
+
+// Track connected users
+const connectedUsers = new Set();
 
 export const createWebSocketServer = (server) => {
   const wss = new WebSocketServer({ server });
@@ -18,12 +18,14 @@ export const createWebSocketServer = (server) => {
 
 export const setupWebSocketHandlers = (wss, handlers) => {
   wss.on('connection', (ws) => {
-    ws.userId = null;
-
     ws.on('message', (data) => {
       const message = JSON.parse(data);
+      
+      // Handle user identification and send initial diagram
       if (message.type === 'user-identify' && message.userId) {
-        registerUserSession(ws, message.userId);
+        ws.userId = message.userId;
+        connectedUsers.add(message.userId);
+        console.log(`User ${message.userId} connected. Total: ${connectedUsers.size}`);
         
         // Send latest diagram to new user
         if (latestDiagramXML) {
@@ -35,22 +37,31 @@ export const setupWebSocketHandlers = (wss, handlers) => {
           console.log(`Sent latest diagram to user ${message.userId}`);
         }
         
-        // Broadcast after user registration
-        if (handlers.onUserIdentified) {
-          handlers.onUserIdentified(ws, wss);
+        // Broadcast updated user count to all clients
+        if (handlers.onUserCountChange) {
+          handlers.onUserCountChange(wss, connectedUsers.size);
         }
+        
+        return;
       }
       
+      // Handle other messages
       if (handlers.onMessage) {
         handlers.onMessage(ws, data);
       }
     });
 
     ws.on('close', () => {
-      console.log('Client disconnected');
       if (ws.userId) {
-        unregisterUserSession(ws, ws.userId);
+        connectedUsers.delete(ws.userId);
+        console.log(`Client disconnected. Total: ${connectedUsers.size}`);
+        
+        // Broadcast updated user count to all clients
+        if (handlers.onUserCountChange) {
+          handlers.onUserCountChange(wss, connectedUsers.size);
+        }
       }
+      
       if (handlers.onClose) {
         handlers.onClose(ws);
       }
@@ -65,25 +76,10 @@ export const setupWebSocketHandlers = (wss, handlers) => {
   });
 };
 
-
-// Register user session
-const registerUserSession = (ws, userId) => {
-  ws.userId = userId;
-  if (!userSessions.has(userId)) {
-    userSessions.set(userId, new Set());
-  }
-  userSessions.get(userId).add(ws);
-  console.log(`User ${userId} registered. Unique users: ${userSessions.size}`);
-};
-
-// Unregister user session
-const unregisterUserSession = (ws, userId) => {
-  if (userSessions.has(userId)) {
-    userSessions.get(userId).delete(ws);
-    if (userSessions.get(userId).size === 0) {
-      userSessions.delete(userId);
-      console.log(`User ${userId} left. Unique users: ${userSessions.size}`);
-    }
+export const sendMessage = (ws, message) => {
+  if (ws.readyState === WebSocket.OPEN) {
+    const jsonMessage = typeof message === 'string' ? message : JSON.stringify(message);
+    ws.send(jsonMessage);
   }
 };
 
@@ -97,13 +93,6 @@ export const broadcastMessage = (wss, message) => {
   });
 };
 
-export const sendMessage = (ws, message) => {
-  if (ws.readyState === WebSocket.OPEN) {
-    const jsonMessage = typeof message === 'string' ? message : JSON.stringify(message);
-    ws.send(jsonMessage);
-  }
-};
-
 export const broadcastMessageExcept = (wss, sender, message) => {
   const jsonMessage = typeof message === 'string' ? message : JSON.stringify(message);
   
@@ -114,21 +103,11 @@ export const broadcastMessageExcept = (wss, sender, message) => {
   });
 };
 
-export const getConnectedUsers = (wss) => {
-  return Array.from(userSessions.keys());
-};
-
-export const closeWebSocketServer = (wss) => {
-  wss.close(() => {
-    console.log('WebSocket server closed');
-  });
-};
-
 export const updateLatestDiagram = (xml) => {
   latestDiagramXML = xml;
   console.log('Latest diagram updated on backend');
 };
 
-export const getLatestDiagram = () => {
-  return latestDiagramXML;
+export const getConnectedUsersList = () => {
+  return connectedUsers;
 };
