@@ -6,7 +6,8 @@ import {
   setupWebSocketHandlers,
   broadcastMessage,
   broadcastMessageExcept,
-  getConnectedUsers
+  getConnectedUsers,
+  updateLatestDiagram
 } from './services/websocketService.js';
 
 const app = express();
@@ -39,6 +40,11 @@ setupWebSocketHandlers(wss, {
 
       // Handle diagram updates with Yjs global room
       if (message.type === 'diagram-update') {
+        // Save the latest diagram state on backend
+        if (message.xml) {
+          updateLatestDiagram(message.xml);
+        }
+        
         // Broadcast diagram updates to all clients except sender
         broadcastMessageExcept(wss, ws, {
           type: 'diagram-update',

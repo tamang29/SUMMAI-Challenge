@@ -45,7 +45,7 @@ const ModelEditor = forwardRef<ModelEditorRef>((props, ref) => {
     <>
       <div className="connected-users-list">
         <button onClick={toggleConnectedUsersList}> 
-          Connected Users: ({connectedUsers.length})
+          Online Users: ({connectedUsers.length})
         </button>
         {(openConnectedUsersList && connectedUsers.length > 0) ? (
           <ul>

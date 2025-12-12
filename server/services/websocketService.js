@@ -7,6 +7,9 @@ import { WebSocketServer, WebSocket } from 'ws';
 // Track unique users by session
 const userSessions = new Map(); // userId -> Set of connections
 
+// Store the latest diagram state
+let latestDiagramXML = null;
+
 export const createWebSocketServer = (server) => {
   const wss = new WebSocketServer({ server });
   console.log('WebSocket server initialized');
@@ -21,6 +24,17 @@ export const setupWebSocketHandlers = (wss, handlers) => {
       const message = JSON.parse(data);
       if (message.type === 'user-identify' && message.userId) {
         registerUserSession(ws, message.userId);
+        
+        // Send latest diagram to new user
+        if (latestDiagramXML) {
+          sendMessage(ws, {
+            type: 'initial-diagram',
+            xml: latestDiagramXML,
+            timestamp: new Date().toISOString()
+          });
+          console.log(`Sent latest diagram to user ${message.userId}`);
+        }
+        
         // Broadcast after user registration
         if (handlers.onUserIdentified) {
           handlers.onUserIdentified(ws, wss);
@@ -108,4 +122,13 @@ export const closeWebSocketServer = (wss) => {
   wss.close(() => {
     console.log('WebSocket server closed');
   });
+};
+
+export const updateLatestDiagram = (xml) => {
+  latestDiagramXML = xml;
+  console.log('Latest diagram updated on backend');
+};
+
+export const getLatestDiagram = () => {
+  return latestDiagramXML;
 };
