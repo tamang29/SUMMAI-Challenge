@@ -12,7 +12,8 @@
   "dependencies": {
     "bpmn-js": "^18.9.1",
     "react": "^19.2.1",
-    "react-dom": "^19.2.1"
+    "react-dom": "^19.2.1",
+    "yjs": "^13.6.18"
   },
   "devDependencies": {
     "@types/react": "^18.2.45",

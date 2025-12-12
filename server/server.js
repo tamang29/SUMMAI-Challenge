@@ -37,12 +37,23 @@ setupWebSocketHandlers(wss, {
       const message = JSON.parse(data);
       console.log('Parsed message:', message);
 
-      // Broadcast message to all clients except sender
-      broadcastMessageExcept(wss, ws, {
-        type: message.type || 'message',
-        data: message.data,
-        timestamp: new Date().toISOString()
-      });
+      // Handle diagram updates with Yjs global room
+      if (message.type === 'diagram-update') {
+        // Broadcast diagram updates to all clients except sender
+        broadcastMessageExcept(wss, ws, {
+          type: 'diagram-update',
+          xml: message.xml,
+          room: message.room,
+          timestamp: message.timestamp || new Date().toISOString()
+        });
+      } else {
+        // Handle other message types
+        broadcastMessageExcept(wss, ws, {
+          type: message.type || 'message',
+          data: message.data,
+          timestamp: new Date().toISOString()
+        });
+      }
 
       // Send acknowledgment to sender
       ws.send(JSON.stringify({
