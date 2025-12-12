@@ -6,7 +6,8 @@ import {
   setupWebSocketHandlers,
   broadcastMessage,
   broadcastMessageExcept,
-  getConnectedUsers
+  updateLatestDiagram,
+  getConnectedUsersList
 } from './services/websocketService.js';
 
 const app = express();
@@ -21,24 +22,25 @@ app.use(express.json());
 const wss = createWebSocketServer(server);
 
 setupWebSocketHandlers(wss, {
-  onUserIdentified: (ws, wss) => {
-    console.log(`User ${ws.userId} identified. Total users: ${getConnectedUsers(wss).length}`);
-    
-    // Notify all clients about new user connection
+  onUserCountChange: (wss, count) => {
     broadcastMessage(wss, {
-      type: 'user-joined',
-      message: 'A new user has joined',
-      connectedUsers: getConnectedUsers(wss)
+      type: 'user-count-update',
+      count: count,
+      users: Array.from(getConnectedUsersList())
     });
   },
 
   onMessage: (ws, data) => {
     try {
       const message = JSON.parse(data);
-      console.log('Parsed message:', message);
 
       // Handle diagram updates with Yjs global room
       if (message.type === 'diagram-update') {
+        // Save the latest diagram state on backend
+        if (message.xml) {
+          updateLatestDiagram(message.xml);
+        }
+        
         // Broadcast diagram updates to all clients except sender
         broadcastMessageExcept(wss, ws, {
           type: 'diagram-update',
@@ -70,14 +72,7 @@ setupWebSocketHandlers(wss, {
   },
 
   onClose: (ws) => {
-    console.log(`Client disconnected. Total users: ${getConnectedUsers(wss).length}`);
-    
-    // Notify all clients about disconnection
-    broadcastMessage(wss, {
-      type: 'user-left',
-      message: 'A user has left',
-      connectedUsers: getConnectedUsers(wss)
-    });
+    console.log('Client disconnected');
   },
 
   onError: (ws, error) => {
@@ -88,8 +83,7 @@ setupWebSocketHandlers(wss, {
 
 app.get('/health', (req, res) => {
   res.json({ 
-    status: 'Server is running',
-    connectedUsers: getConnectedUsers(wss).length
+    status: 'Server is running'
   });
 });
 

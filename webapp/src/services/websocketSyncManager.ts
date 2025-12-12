@@ -16,14 +16,37 @@ export class WebSocketSyncManager {
   private yText: Y.Text | null = null;
   private modeler: Modeler | null = null;
   private isLocalChange = false;
-  private reconnectTimeout: NodeJS.Timeout | null = null;
-  private syncDebounceTimeout: NodeJS.Timeout | null = null;
+  private reconnectTimeout: number | null = null;
+  private syncDebounceTimeout: number | null = null;
   private synced = false;
+  private userId: string;
 
   constructor(
     private wsUrl: string,
-    private onError?: (e: Event) => void
-  ) {}
+    private onError?: (e: Event) => void,
+    private onUserCountUpdate?: (count: number) => void,
+    private onUserListUpdate?: (users: string[]) => void
+  ) {
+    this.userId = this.generateUserId();
+  }
+
+  private generateUserId(): string {
+    const stored = localStorage.getItem('summai_user_id');
+    if (stored) return stored;
+    const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    localStorage.setItem('summai_user_id', userId);
+    return userId;
+  }
+
+  private sendUserIdentification(): void {
+    if (this.websocket?.readyState === WebSocket.OPEN) {
+      this.websocket.send(JSON.stringify({
+        type: 'user-identify',
+        userId: this.userId
+      }));
+      console.log('User identification sent:', this.userId);
+    }
+  }
 
   public async initialize(modeler: Modeler): Promise<void> {
     this.modeler = modeler;
@@ -45,17 +68,32 @@ export class WebSocketSyncManager {
       console.log('WebSocket connected to:', this.wsUrl);
       this.synced = true;
       
-      // Send initial sync message
-      this.sendUpdate();
+      // Send user identification first to receive latest diagram
+      this.sendUserIdentification();
     };
 
     this.websocket.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
         
-        // Handle diagram updates from other clients
-        if (data.type === 'diagram-update' && data.xml) {
+        // Handle initial diagram from backend when joining
+        if (data.type === 'initial-diagram' && data.xml) {
+          console.log('Received initial diagram from backend');
           this.handleRemoteUpdate(data.xml);
+        }
+        // Handle diagram updates from other clients
+        else if (data.type === 'diagram-update' && data.xml) {
+          this.handleRemoteUpdate(data.xml);
+        }
+        // Handle user count updates
+        else if (data.type === 'user-count-update' && data.count !== undefined) {
+          console.log('Online users:', data.count);
+          if (this.onUserCountUpdate) {
+            this.onUserCountUpdate(data.count);
+          }
+          if (this.onUserListUpdate && data.users) {
+            this.onUserListUpdate(data.users);
+          }
         }
       } catch (err) {
         console.error('Error parsing WebSocket message:', err);

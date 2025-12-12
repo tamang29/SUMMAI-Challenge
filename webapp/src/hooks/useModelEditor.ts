@@ -24,7 +24,8 @@ interface UseModelEditorReturn {
 
 export const useModelEditor = (
   containerRef: any,
-  socketRef: any
+  onUserCountUpdate?: (count: number) => void,
+  onUserListUpdate?: (users: string[]) => void
 ): UseModelEditorReturn => {
   const modelerRef = useRef(null) as any;
   const syncManagerRef = useRef<WebSocketSyncManager | null>(null);
@@ -62,7 +63,9 @@ export const useModelEditor = (
             'ws://localhost:8000',
             (error: Event) => {
               console.error('WebSocket sync error:', error);
-            }
+            },
+            onUserCountUpdate,
+            onUserListUpdate
           );
           
           await syncManager.initialize(modeler);
