@@ -33,7 +33,6 @@ setupWebSocketHandlers(wss, {
   onMessage: (ws, data) => {
     try {
       const message = JSON.parse(data);
-      console.log('Parsed message:', message);
 
       // Handle diagram updates with Yjs global room
       if (message.type === 'diagram-update') {
