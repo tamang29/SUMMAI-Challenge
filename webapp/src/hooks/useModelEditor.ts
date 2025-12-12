@@ -59,8 +59,10 @@ export const useModelEditor = (
 
         // Initialize Yjs WebSocket sync manager
         try {
+          const wsUrl = import.meta.env.VITE_WS_URL || 'http://localhost:8000';
+          console.log(wsUrl)
           const syncManager = new WebSocketSyncManager(
-            'ws://localhost:8000',
+            wsUrl,
             (error: Event) => {
               console.error('WebSocket sync error:', error);
             },
