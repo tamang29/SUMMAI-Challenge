@@ -7,8 +7,8 @@ import { WebSocketServer, WebSocket } from 'ws';
 // Store the latest diagram state
 let latestDiagramXML = null;
 
-// Track connected users
-const connectedUsers = new Set();
+// Track connected users - map of userId to count of active connections
+const connectedUsers = new Map();
 
 export const createWebSocketServer = (server) => {
   const wss = new WebSocketServer({ server });
@@ -24,8 +24,14 @@ export const setupWebSocketHandlers = (wss, handlers) => {
       // Handle user identification and send initial diagram
       if (message.type === 'user-identify' && message.userId) {
         ws.userId = message.userId;
-        connectedUsers.add(message.userId);
-        console.log(`User ${message.userId} connected. Total: ${connectedUsers.size}`);
+        // Increment connection count for this user
+        if (connectedUsers.has(message.userId)) {
+          connectedUsers.set(message.userId, connectedUsers.get(message.userId) + 1);
+        } else {
+          connectedUsers.set(message.userId, 1);
+        }
+        
+        console.log(`User ${message.userId} connected. User connections: ${connectedUsers.get(message.userId)}. Total unique users: ${connectedUsers.size}`);
         
         // Send latest diagram to new user
         if (latestDiagramXML) {
@@ -41,7 +47,7 @@ export const setupWebSocketHandlers = (wss, handlers) => {
         if (handlers.onUserCountChange) {
           handlers.onUserCountChange(wss, connectedUsers.size);
         }
-        
+
         return;
       }
       
@@ -53,8 +59,15 @@ export const setupWebSocketHandlers = (wss, handlers) => {
 
     ws.on('close', () => {
       if (ws.userId) {
-        connectedUsers.delete(ws.userId);
-        console.log(`Client disconnected. Total: ${connectedUsers.size}`);
+        // Decrement connection count for this user
+        const currentCount = connectedUsers.get(ws.userId);
+        if (currentCount && currentCount > 1) {
+          connectedUsers.set(ws.userId, currentCount - 1);
+        } else {
+          connectedUsers.delete(ws.userId);
+        }
+        
+        console.log(`Client disconnected. Remaining unique users: ${connectedUsers.size}`);
         
         // Broadcast updated user count to all clients
         if (handlers.onUserCountChange) {
