@@ -96,10 +96,10 @@ Edit `webapp/.env.local`:
 VITE_WS_URL=wss://xxxxx-xx-xxx-xxx.ngrok-free.app
 ```
 
-#### 4. Restart Frontend Dev Server
+#### 4. Restart Services
 
+From the root directory:
 ```bash
-cd webapp
 npm run dev
 ```
 
