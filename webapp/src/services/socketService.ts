@@ -26,10 +26,10 @@ export class SocketService {
    * @private
    */
   private generateUserId(): string {
-    const stored = localStorage.getItem('summai_user_id');
+    const stored = localStorage.getItem('user_id');
     if (stored) return stored;
     const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    localStorage.setItem('summai_user_id', userId);
+    localStorage.setItem('user_id', userId);
     return userId;
   }
 
