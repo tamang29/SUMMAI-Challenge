@@ -104,3 +104,32 @@ npm run dev
 ```
 
 Now your app is accessible globally via ngrok URLs!
+
+---
+
+## 🧪 Testing the App
+
+### Testing Locally
+
+1. **Open Browser - First User:**
+   - Go to `http://localhost:5173`
+   - You should see the BPMN editor load
+
+2. **Open Incognito Tab - Second User:**
+   - Open an incognito/private tab in the same browser
+   - Go to `http://localhost:5173`
+   - This creates a separate session with a different user_id
+
+3. **Alternative: Different Browser:**
+   - Open the URL in a different browser or device on your network
+   - Each browser will have its own unique user_id
+
+4. **Verify Real-Time Collaboration:**
+   - Edit the diagram in one tab/browser
+   - Changes should appear instantly in the other tab/browser
+   - Check the "online users" indicator - it should show `1` (one unique user) if both tabs are from the same browser, or `2` if from different browsers/devices
+   - Close one tab/browser and verify the user count updates correctly
+
+### Testing with ngrok (Optional)
+
+If you've configured ngrok, replace `http://localhost:5173` with your ngrok frontend URL (e.g., `https://yyyyy-yy-yyy-yyy.ngrok-free.app`) and follow the same steps above to test collaboration across different networks.
