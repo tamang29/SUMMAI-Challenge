@@ -82,6 +82,86 @@ export const removeElementHighlight = (modeler: Modeler, elementId: string): voi
   }
 };
 
+/**
+ * Subscribe to element selection events
+ * bpmn-js provides the following selection events:
+ * - 'selection.changed' - fired when selection changes
+ */
+export const subscribeToElementSelectionEvents = (
+  modeler: Modeler,
+  onElementSelected: (element: any) => void,
+  onElementUnselected: (element: any) => void
+): void => {
+  try {
+    const selection = modeler.get('selection') as any;
+    const eventBus = modeler.get('eventBus') as any;
+
+    // Listen for selection.changed - fires when user selects/deselects elements
+    eventBus.on('selection.changed', (event: any) => {
+      const { newSelection, oldSelection } = event;
+      
+      console.log('Selection changed - New:', newSelection, 'Old:', oldSelection);
+
+      // Handle newly selected elements
+      if (newSelection && newSelection.length > 0) {
+        newSelection.forEach((element: any) => {
+          // Only notify if this is a newly selected element (not in oldSelection)
+          const wasSelected = oldSelection && oldSelection.some((el: any) => el.id === element.id);
+          if (!wasSelected) {
+            console.log('Element selected:', element.id);
+            onElementSelected(element);
+          }
+        });
+      }
+
+      // Handle deselected elements
+      if (oldSelection && oldSelection.length > 0) {
+        oldSelection.forEach((element: any) => {
+          // Only notify if this element is no longer selected (not in newSelection)
+          const isStillSelected = newSelection && newSelection.some((el: any) => el.id === element.id);
+          if (!isStillSelected) {
+            console.log('Element unselected:', element.id);
+            onElementUnselected(element);
+          }
+        });
+      }
+    });
+
+  } catch (err) {
+    console.error('Error subscribing to selection events:', err);
+  }
+};
+
+/**
+ * Highlight element with blue color (for selection)
+ */
+export const highlightSelectedElement = (modeler: Modeler, elementId: string): void => {
+  try {
+    const canvas = modeler.get('canvas') as any;
+    const elementRegistry = modeler.get('elementRegistry') as any;
+    
+    const element = elementRegistry.get(elementId);
+    if (element) {
+      // Add blue overlay/highlight for selection
+      canvas.addMarker(elementId, 'highlight-blue');
+    }
+  } catch (err) {
+    console.error('Error highlighting selected element:', err);
+  }
+};
+
+/**
+ * Remove selection highlight from element
+ */
+export const removeSelectedElementHighlight = (modeler: Modeler, elementId: string): void => {
+  try {
+    const canvas = modeler.get('canvas') as any;
+    canvas.removeMarker(elementId, 'highlight-blue');
+  } catch (err) {
+    console.error('Error removing selected element highlight:', err);
+  }
+};
+
 interface ImportResult {
   warnings: string[];
 }

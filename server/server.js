@@ -75,6 +75,30 @@ setupWebSocketHandlers(wss, {
           timestamp: message.timestamp || new Date().toISOString()
         });
       }
+      // Handle element selection events
+      else if (message.type === 'element-select') {
+        console.log('Element select:', message.elementId, 'by user:', message.userId);
+        // Broadcast select to all other clients
+        broadcastMessageExcept(wss, ws, {
+          type: 'element-select',
+          elementId: message.elementId,
+          elementType: message.elementType,
+          userId: message.userId,
+          timestamp: message.timestamp || new Date().toISOString()
+        });
+      }
+      // Handle element unselection events
+      else if (message.type === 'element-unselect') {
+        console.log('Element unselect:', message.elementId, 'by user:', message.userId);
+        // Broadcast unselect to all other clients
+        broadcastMessageExcept(wss, ws, {
+          type: 'element-unselect',
+          elementId: message.elementId,
+          elementType: message.elementType,
+          userId: message.userId,
+          timestamp: message.timestamp || new Date().toISOString()
+        });
+      }
       else {
         // Handle other message types
         broadcastMessageExcept(wss, ws, {
