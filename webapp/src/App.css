@@ -67,3 +67,22 @@
   overflow: hidden;
 }
 
+/**
+ * Green highlight marker for dragged elements
+ * Applied via canvas.addMarker(elementId, 'highlight-green')
+ */
+.bpmn-container .djs-shape.highlight-green {
+  outline: 3px solid #10b981 !important;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.5) !important;
+}
+
+.bpmn-container .djs-shape.highlight-green .djs-visual {
+  opacity: 1 !important;
+}
+
+/* Ensure the highlight works on connections as well */
+.bpmn-container .djs-connection.highlight-green {
+  stroke: #10b981 !important;
+  stroke-width: 3px !important;
+  filter: drop-shadow(0 0 3px rgba(16, 185, 129, 0.5));
+}

@@ -11,6 +11,77 @@ export const createModeler = (container: HTMLElement): Modeler => {
   });
 };
 
+/**
+ * Subscribe to element drag events
+ * bpmn-js provides the following drag events:
+ * - 'element.changed' - fired when element properties change
+ * - 'shape.added', 'shape.removed' - connection/shape lifecycle
+ */
+export const subscribeToElementDragEvents = (
+  modeler: Modeler,
+  onDragStart: (element: any) => void,
+  onDragEnd: (element: any) => void
+): void => {
+  try {
+    const eventBus = modeler.get('eventBus') as any;
+    
+    // Listen for shape.move.start - when user starts dragging an element
+    eventBus.on('shape.move.start', (event: any) => {
+      const { shape } = event;
+      console.log('Element drag started:', shape.id, shape);
+      onDragStart(shape);
+    });
+
+    // Listen for shape.move.end - when user finishes dragging an element
+    eventBus.on('shape.move.end', (event: any) => {
+      const { shape } = event;
+      console.log('Element drag ended:', shape.id, shape);
+      onDragEnd(shape);
+    });
+
+    // Alternative: Listen for element.changed which fires during drag movements
+    eventBus.on('element.changed', (event: any) => {
+      const { element } = event;
+      if (element && element.x !== undefined && element.y !== undefined) {
+        console.log('Element position changed:', element.id);
+      }
+    });
+
+  } catch (err) {
+    console.error('Error subscribing to drag events:', err);
+  }
+};
+
+/**
+ * Highlight element with green color
+ */
+export const highlightElement = (modeler: Modeler, elementId: string): void => {
+  try {
+    const canvas = modeler.get('canvas') as any;
+    const elementRegistry = modeler.get('elementRegistry') as any;
+    
+    const element = elementRegistry.get(elementId);
+    if (element) {
+      // Add green overlay/highlight
+      canvas.addMarker(elementId, 'highlight-green');
+    }
+  } catch (err) {
+    console.error('Error highlighting element:', err);
+  }
+};
+
+/**
+ * Remove highlight from element
+ */
+export const removeElementHighlight = (modeler: Modeler, elementId: string): void => {
+  try {
+    const canvas = modeler.get('canvas') as any;
+    canvas.removeMarker(elementId, 'highlight-green');
+  } catch (err) {
+    console.error('Error removing element highlight:', err);
+  }
+};
+
 interface ImportResult {
   warnings: string[];
 }

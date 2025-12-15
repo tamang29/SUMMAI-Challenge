@@ -5,7 +5,7 @@
 
 import * as Y from 'yjs';
 import Modeler from 'bpmn-js/lib/Modeler';
-import { exportDiagramXML, importDiagramXML } from './modelerService';
+import { exportDiagramXML, importDiagramXML, subscribeToElementDragEvents, highlightElement, removeElementHighlight } from './modelerService';
 import { saveDiagramToStorage } from './diagramService';
 
 const GLOBAL_ROOM = 'bpmn-global-room';
@@ -20,6 +20,7 @@ export class WebSocketSyncManager {
   private syncDebounceTimeout: number | null = null;
   private synced = false;
   private userId: string;
+  private highlightedElements: Set<string> = new Set();
 
   constructor(
     private wsUrl: string,
@@ -85,6 +86,13 @@ export class WebSocketSyncManager {
         else if (data.type === 'diagram-update' && data.xml) {
           this.handleRemoteUpdate(data.xml);
         }
+        // Handle element drag events from other users
+        else if (data.type === 'element-drag-start') {
+          this.handleRemoteDragStart(data);
+        }
+        else if (data.type === 'element-drag-end') {
+          this.handleRemoteDragEnd(data);
+        }
         // Handle user count updates
         else if (data.type === 'user-count-update' && data.count !== undefined) {
           console.log('Online users:', data.count);
@@ -124,7 +132,78 @@ export class WebSocketSyncManager {
       await this.handleLocalChange();
     });
 
+    // Subscribe to element drag events
+    subscribeToElementDragEvents(
+      modeler,
+      (element) => this.handleLocalDragStart(element),
+      (element) => this.handleLocalDragEnd(element)
+    );
+
     console.log('WebSocketSyncManager initialized');
+  }
+
+  private handleLocalDragStart(element: any): void {
+    if (!element || !this.websocket || this.websocket.readyState !== WebSocket.OPEN) return;
+
+    // Highlight the dragged element locally
+    if (this.modeler) {
+      highlightElement(this.modeler, element.id);
+      this.highlightedElements.add(element.id);
+    }
+
+    // Broadcast drag start event to other users
+    this.websocket.send(JSON.stringify({
+      type: 'element-drag-start',
+      elementId: element.id,
+      elementType: element.type,
+      userId: this.userId,
+      timestamp: Date.now()
+    }));
+
+    console.log('Broadcast element drag start:', element.id);
+  }
+
+  private handleLocalDragEnd(element: any): void {
+    if (!element || !this.websocket || this.websocket.readyState !== WebSocket.OPEN) return;
+
+    // Remove highlight from locally dragged element
+    if (this.modeler) {
+      removeElementHighlight(this.modeler, element.id);
+      this.highlightedElements.delete(element.id);
+    }
+
+    // Broadcast drag end event to other users
+    this.websocket.send(JSON.stringify({
+      type: 'element-drag-end',
+      elementId: element.id,
+      elementType: element.type,
+      userId: this.userId,
+      x: element.x,
+      y: element.y,
+      timestamp: Date.now()
+    }));
+
+    console.log('Broadcast element drag end:', element.id);
+  }
+
+  private handleRemoteDragStart(data: any): void {
+    if (!this.modeler || data.userId === this.userId) return;
+
+    console.log('Remote drag start received:', data.elementId, 'from user:', data.userId);
+    
+    // Highlight element being dragged by remote user
+    highlightElement(this.modeler, data.elementId);
+    this.highlightedElements.add(data.elementId);
+  }
+
+  private handleRemoteDragEnd(data: any): void {
+    if (!this.modeler || data.userId === this.userId) return;
+
+    console.log('Remote drag end received:', data.elementId, 'from user:', data.userId);
+    
+    // Remove highlight from remotely dragged element
+    removeElementHighlight(this.modeler, data.elementId);
+    this.highlightedElements.delete(data.elementId);
   }
 
   private async handleLocalChange(): Promise<void> {
