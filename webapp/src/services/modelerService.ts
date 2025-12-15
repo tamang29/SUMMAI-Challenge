@@ -1,6 +1,5 @@
 /**
  * Modeler Service - Handles BPMN modeler operations
- * Responsibility: Initialize, manage, and configure the BPMN modeler
  */
 
 import Modeler from 'bpmn-js/lib/Modeler';
@@ -12,7 +11,6 @@ export const createModeler = (container: HTMLElement): Modeler => {
 };
 
 /**
- * Subscribe to element drag events
  * bpmn-js provides the following drag events:
  * - 'element.changed' - fired when element properties change
  * - 'shape.added', 'shape.removed' - connection/shape lifecycle
@@ -25,21 +23,21 @@ export const subscribeToElementDragEvents = (
   try {
     const eventBus = modeler.get('eventBus') as any;
     
-    // Listen for shape.move.start - when user starts dragging an element
+    // Listen - when user starts dragging an element
     eventBus.on('shape.move.start', (event: any) => {
       const { shape } = event;
       console.log('Element drag started:', shape.id, shape);
       onDragStart(shape);
     });
 
-    // Listen for shape.move.end - when user finishes dragging an element
+    // Listen - when user finishes dragging an element
     eventBus.on('shape.move.end', (event: any) => {
       const { shape } = event;
       console.log('Element drag ended:', shape.id, shape);
       onDragEnd(shape);
     });
 
-    // Alternative: Listen for element.changed which fires during drag movements
+    // Listen for element.changed which fires during drag movements
     eventBus.on('element.changed', (event: any) => {
       const { element } = event;
       if (element && element.x !== undefined && element.y !== undefined) {
@@ -52,9 +50,8 @@ export const subscribeToElementDragEvents = (
   }
 };
 
-/**
- * Highlight element with green color
- */
+// Highlight element with green color
+ 
 export const highlightElement = (modeler: Modeler, elementId: string): void => {
   try {
     const canvas = modeler.get('canvas') as any;
@@ -70,9 +67,7 @@ export const highlightElement = (modeler: Modeler, elementId: string): void => {
   }
 };
 
-/**
- * Remove highlight from element
- */
+// Remove highlight from element
 export const removeElementHighlight = (modeler: Modeler, elementId: string): void => {
   try {
     const canvas = modeler.get('canvas') as any;
@@ -82,11 +77,6 @@ export const removeElementHighlight = (modeler: Modeler, elementId: string): voi
   }
 };
 
-/**
- * Subscribe to element selection events
- * bpmn-js provides the following selection events:
- * - 'selection.changed' - fired when selection changes
- */
 export const subscribeToElementSelectionEvents = (
   modeler: Modeler,
   onElementSelected: (element: any) => void,
@@ -96,7 +86,7 @@ export const subscribeToElementSelectionEvents = (
     const selection = modeler.get('selection') as any;
     const eventBus = modeler.get('eventBus') as any;
 
-    // Listen for selection.changed - fires when user selects/deselects elements
+    // Listen for when user selects/deselects elements
     eventBus.on('selection.changed', (event: any) => {
       const { newSelection, oldSelection } = event;
       
@@ -105,7 +95,7 @@ export const subscribeToElementSelectionEvents = (
       // Handle newly selected elements
       if (newSelection && newSelection.length > 0) {
         newSelection.forEach((element: any) => {
-          // Only notify if this is a newly selected element (not in oldSelection)
+
           const wasSelected = oldSelection && oldSelection.some((el: any) => el.id === element.id);
           if (!wasSelected) {
             console.log('Element selected:', element.id);
@@ -117,7 +107,7 @@ export const subscribeToElementSelectionEvents = (
       // Handle deselected elements
       if (oldSelection && oldSelection.length > 0) {
         oldSelection.forEach((element: any) => {
-          // Only notify if this element is no longer selected (not in newSelection)
+
           const isStillSelected = newSelection && newSelection.some((el: any) => el.id === element.id);
           if (!isStillSelected) {
             console.log('Element unselected:', element.id);
@@ -132,9 +122,8 @@ export const subscribeToElementSelectionEvents = (
   }
 };
 
-/**
- * Highlight element with blue color (for selection)
- */
+//Highlight element with blue color (for selection)
+ 
 export const highlightSelectedElement = (modeler: Modeler, elementId: string): void => {
   try {
     const canvas = modeler.get('canvas') as any;
@@ -150,9 +139,8 @@ export const highlightSelectedElement = (modeler: Modeler, elementId: string): v
   }
 };
 
-/**
- * Remove selection highlight from element
- */
+//Remove selection highlight from element
+ 
 export const removeSelectedElementHighlight = (modeler: Modeler, elementId: string): void => {
   try {
     const canvas = modeler.get('canvas') as any;
