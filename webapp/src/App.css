@@ -4,7 +4,7 @@
   align-items: center;
   justify-content: flex-start;
   min-height: 100vh;
-  padding: 20px;
+  padding: 1.25rem;
   background-color: #f3f4f6;
 }
 
@@ -20,80 +20,160 @@
   color: #6b7280;
 }
 
-.connected-users-list {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  z-index: 100;
-  max-width: 150px;
+/* Single container layout */
+.model-editor-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+  max-width: 100rem;
 }
 
-.user-indicator {
-  color: #10b981;
-  margin-right: 6px;
-  font-weight: bold;
+.editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.25rem;
 }
-.connected-users-list h3 {
-  margin: 0 0 8px 0;
-  font-size: 0.875rem;
+
+.editor-title {
+  font-size: 1.5rem;
+  font-weight: 600;
   color: #374151;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  margin: 0;
+  flex: 0 1 auto;
+}
+
+.header-controls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+
+.connected-users-list,
+.activity-indicator {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  min-width: 150px;
+  position: relative;
+}
+
+.connected-users-list {
+  padding: 0;
+}
+
+.activity-indicator {
+  padding: 0.75rem;
+}
+
+.connected-users-list button {
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  background-color: white;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+}
+
+.connected-users-list button:hover {
+  background-color: #f9fafb;
+  border-color: #9ca3af;
 }
 
 .connected-users-list ul {
   list-style: none;
-  padding: 10px;
-  margin: 0;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin: 0.5rem 0 0 0;
+  padding: 0.625rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  background-color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  max-height: 12.5rem;
+  overflow-y: auto;
+  min-width: 10rem;
 }
 
 .connected-users-list li {
-  padding: 4px 0;
+  padding: 0.25rem 0;
   font-size: 0.8125rem;
   color: #6b7280;
-  word-break: break-all;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.user-indicator {
+  color: #10b981;
+  margin-right: 0.375rem;
+  font-weight: bold;
+}
+
+.activity-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 0.5rem 0;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+  font-size: 0.8125rem;
+  color: #6b7280;
+}
+
+.marker {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 0.125rem;
+  flex-shrink: 0;
+}
+
+.marker-blue {
+  background-color: #3b82f6;
+}
+
+.marker-green {
+  background-color: #10b981;
 }
 
 .bpmn-container {
   width: 100%;
-  max-width: 1400px;
-  height: 700px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
+  height: 37.5rem;
   background-color: white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
   overflow: hidden;
 }
 
-/**
- * Green highlight marker for dragged elements
- * Applied via canvas.addMarker(elementId, 'highlight-green')
- * Colors the border of the element
- */
+/* Element highlight markers */
 .bpmn-container .djs-shape.highlight-green .djs-visual > * {
   stroke: #10b981 !important;
   stroke-width: 3 !important;
 }
 
-/* For connections being dragged */
 .bpmn-container .djs-connection.highlight-green {
   stroke: #10b981 !important;
   stroke-width: 3px !important;
 }
 
-/**
- * Blue highlight marker for selected elements
- * Applied via canvas.addMarker(elementId, 'highlight-blue')
- * Colors the border of the element
- */
 .bpmn-container .djs-shape.highlight-blue .djs-visual > * {
   stroke: #3b82f6 !important;
   stroke-width: 3 !important;
 }
 
-/* For connections being selected */
 .bpmn-container .djs-connection.highlight-blue {
   stroke: #3b82f6 !important;
   stroke-width: 3px !important;
