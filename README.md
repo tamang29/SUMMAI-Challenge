@@ -5,12 +5,12 @@ To know more about the challenge click [here](https://github.com/SUMM-AI-Github/
 
 ## 🧩 Core Features
 
-- Render BPMN diagrams in the browser using **bpmn.io** (`bpmn-js`) .
-- Edit the diagram - changes should appear live for all connected users.
-- Show a simple "online users" indicator.
-- Store the current BPMN diagram in memory (no need for a DB).
+- Render BPMN diagrams in the browser using **bpmn.io** (`bpmn-js`). ✅
+- Edit the diagram - changes should appear live for all connected users. ✅
+- Show a simple "online users" indicator. ✅
+- Store the current BPMN diagram in memory (no need for a DB). ✅
 
-**Bonus:** show a lock/marker when another user is editing a BPMN element.
+**Bonus:** show a lock/marker when another user is editing a BPMN element. ✅
 
 ## 📦 Prerequisites
 
@@ -129,6 +129,19 @@ Now your app is accessible globally via ngrok URLs!
    - Changes should appear instantly in the other tab/browser
    - Check the "online users" indicator - it should show `1` (one unique user) if both tabs are from the same browser, or `2` if from different browsers/devices
    - Close one tab/browser and verify the user count updates correctly
+
+---
+
+## 👥 User Activity Indicators
+
+The application displays real-time activity markers to help users see what others are doing:
+
+### Activity Legend
+
+- **Blue Border** - Indicates that another user has selected an element in the diagram
+- **Green Border** - Indicates that another user is currently dragging/moving an element
+
+These visual indicators appear in real-time as other users interact with the diagram, allowing for better collaboration awareness. Your own selections and drags are not highlighted locally, only other users' activities are visible to you.
 
 ### Testing with ngrok (Optional)
 
