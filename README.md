@@ -64,6 +64,11 @@ npm run webapp
 ```bash
 docker-compose up --build
 ```
+OR with newer syntax
+
+```bash
+docker compose up --build
+```
 
 This will:
 - Build the backend server image
