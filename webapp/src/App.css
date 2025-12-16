@@ -67,3 +67,34 @@
   overflow: hidden;
 }
 
+/**
+ * Green highlight marker for dragged elements
+ * Applied via canvas.addMarker(elementId, 'highlight-green')
+ * Colors the border of the element
+ */
+.bpmn-container .djs-shape.highlight-green .djs-visual > * {
+  stroke: #10b981 !important;
+  stroke-width: 3 !important;
+}
+
+/* For connections being dragged */
+.bpmn-container .djs-connection.highlight-green {
+  stroke: #10b981 !important;
+  stroke-width: 3px !important;
+}
+
+/**
+ * Blue highlight marker for selected elements
+ * Applied via canvas.addMarker(elementId, 'highlight-blue')
+ * Colors the border of the element
+ */
+.bpmn-container .djs-shape.highlight-blue .djs-visual > * {
+  stroke: #3b82f6 !important;
+  stroke-width: 3 !important;
+}
+
+/* For connections being selected */
+.bpmn-container .djs-connection.highlight-blue {
+  stroke: #3b82f6 !important;
+  stroke-width: 3px !important;
+}

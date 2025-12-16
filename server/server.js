@@ -48,7 +48,58 @@ setupWebSocketHandlers(wss, {
           room: message.room,
           timestamp: message.timestamp || new Date().toISOString()
         });
-      } else {
+      }
+      // Handle element drag start events
+      else if (message.type === 'element-drag-start') {
+        console.log('Element drag start:', message.elementId, 'by user:', message.userId);
+        // Broadcast drag start to all other clients
+        broadcastMessageExcept(wss, ws, {
+          type: 'element-drag-start',
+          elementId: message.elementId,
+          elementType: message.elementType,
+          userId: message.userId,
+          timestamp: message.timestamp || new Date().toISOString()
+        });
+      }
+      // Handle element drag end events
+      else if (message.type === 'element-drag-end') {
+        console.log('Element drag end:', message.elementId, 'by user:', message.userId);
+        // Broadcast drag end to all other clients
+        broadcastMessageExcept(wss, ws, {
+          type: 'element-drag-end',
+          elementId: message.elementId,
+          elementType: message.elementType,
+          userId: message.userId,
+          x: message.x,
+          y: message.y,
+          timestamp: message.timestamp || new Date().toISOString()
+        });
+      }
+      // Handle element selection events
+      else if (message.type === 'element-select') {
+        console.log('Element select:', message.elementId, 'by user:', message.userId);
+        // Broadcast select to all other clients
+        broadcastMessageExcept(wss, ws, {
+          type: 'element-select',
+          elementId: message.elementId,
+          elementType: message.elementType,
+          userId: message.userId,
+          timestamp: message.timestamp || new Date().toISOString()
+        });
+      }
+      // Handle element unselection events
+      else if (message.type === 'element-unselect') {
+        console.log('Element unselect:', message.elementId, 'by user:', message.userId);
+        // Broadcast unselect to all other clients
+        broadcastMessageExcept(wss, ws, {
+          type: 'element-unselect',
+          elementId: message.elementId,
+          elementType: message.elementType,
+          userId: message.userId,
+          timestamp: message.timestamp || new Date().toISOString()
+        });
+      }
+      else {
         // Handle other message types
         broadcastMessageExcept(wss, ws, {
           type: message.type || 'message',
