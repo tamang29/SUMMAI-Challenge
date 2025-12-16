@@ -185,7 +185,6 @@ export class WebSocketSyncManager {
   private handleLocalDragEnd(element: any): void {
     if (!element || !this.websocket || this.websocket.readyState !== WebSocket.OPEN) return;
 
-    // Don't remove highlight locally - only broadcast to other users
     // Broadcast drag end event to other users
     this.websocket.send(JSON.stringify({
       type: 'element-drag-end',
@@ -239,7 +238,6 @@ export class WebSocketSyncManager {
   private handleLocalElementUnselect(element: any): void {
     if (!element || !this.websocket || this.websocket.readyState !== WebSocket.OPEN) return;
 
-    // Don't remove highlight locally - only broadcast to other users
     // Broadcast element unselect event to other users
     this.websocket.send(JSON.stringify({
       type: 'element-unselect',

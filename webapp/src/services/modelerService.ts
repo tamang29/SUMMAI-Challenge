@@ -10,11 +10,6 @@ export const createModeler = (container: HTMLElement): Modeler => {
   });
 };
 
-/**
- * bpmn-js provides the following drag events:
- * - 'element.changed' - fired when element properties change
- * - 'shape.added', 'shape.removed' - connection/shape lifecycle
- */
 export const subscribeToElementDragEvents = (
   modeler: Modeler,
   onDragStart: (element: any) => void,
